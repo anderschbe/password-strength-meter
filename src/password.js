@@ -8,11 +8,9 @@
 
   var Password = function ($object, options) {
     var defaults = {
-      customSteps: {
-        0: 'Weak; try combining letters & numbers',
-        34: 'Medium; try using special characters',
-        68: 'Strong password'
-      },
+      badPass: 'Weak; try combining letters & numbers',
+      goodPass: 'Medium; try using special characters',
+      strongPass: 'Strong password',
       enterPass: 'Type your password',
       showPercent: false,
       showText: true,
@@ -56,14 +54,21 @@
         case -1:
           return options.shortPass;
         default:
-          var { text, ...rest } = options.customSteps;
           // https://github.com/elboletaire/password-strength-meter/pull/6
-          for (var stapValue in options.customSteps) {
-            if (score >= stapValue) {
-              text = options.customSteps[stapValue];
+          if (options.customSteps) {
+            var text = options.badPass;
+            for (var stapValue in options.customSteps) {
+              if (score >= stapValue) {
+                text = options.customSteps[stapValue];
+              }
             }
+            return text;
+          } else if (score < 34) {
+            return options.badPass;
+          } else if (score < 68) {
+            return options.goodPass;
           }
-          return text;
+          return options.strongPass;
       }
     }
 
