@@ -25,10 +25,12 @@
       notEnoughNumbers: 'The Password needs at least 0 numbers',
       minimumSymbols: 0,
       notEnoughSymbols: 'The Password needs at least 0 symbols',
-      minimumLetters: 1,
-      notEnoughLetters: 'The Password needs at least 1 letters',
-      minimumUpperLower: 1,
-      notEnoughUpLower: 'The Password needs at least 1 upper and lower char each'
+      minimumLowerChars: 0,
+      notEnoughLowerChars: 'The Password needs at least 0 lower chars',
+      minimumUpperChars: 0,
+      notEnoughUpperChars: 'The Password needs at least 0 upper chars',
+      minimumChars: 1,
+      notEnoughChars: 'The Password needs at least 1 chars'
     };
 
     options = $.extend({}, defaults, options);
@@ -41,12 +43,14 @@
      */
     function scoreText(score) {
       switch (score) {
+        case -7:
+          return options.notEnoughChars;
         case -6:
-          return options.upperLower;
+          return options.notEnoughSymbols;
         case -5:
-          return options.symbols;
+          return options.notEnoughUpperChars;
         case -4:
-          return options.chars;
+          return options.notEnoughLowerChars;
         case -3:
           return options.notEnoughNumbers;
         case -2:
@@ -63,9 +67,11 @@
               }
             }
             return text;
-          } else if (score < 34) {
+          }
+          else if (score < 34) {
             return options.badPass;
-          } else if (score < 68) {
+          }
+          else if (score < 68) {
             return options.goodPass;
           }
           return options.strongPass;
@@ -90,7 +96,10 @@
         score += checkRepetition(2, password).length - password.length;
         score += checkRepetition(3, password).length - password.length;
         score += checkRepetition(4, password).length - password.length;
-      } else return -1;
+      }
+      else {
+        return -1;
+      }
 
       if (options.username) {
         // password === username
@@ -107,28 +116,46 @@
       }
 
       // password has x numbers
-      var nums = countPattern(password, '.*[0-9]', options.minimumNumbers);
-      if (nums < 0) return -3;
-      else if (nums > 0) score += 5;
+      var nums = countPattern(password, '[0-9]', options.minimumNumbers);
+      if (nums < 0) {
+        return -3;
+      }
+      else if (nums > 0) {
+        score += 5;
+      }
 
-      // password has x chars
-      var chars = countPattern(password, '.*[0-9]', options.minimumLetters);
-      if (chars < 0) return -4;
+      // password has x lower chars
+      var lowerChars = countPattern(password, '[a-z]', options.minimumLowerChars);
+      if (lowerChars < 0) {
+        return -4;
+      }
+
+      // password has x upper chars
+        var upperChars = countPattern(password, '[A-Z]', options.minimumUpperChars);
+      if (upperChars < 0) {
+        return -5;
+      }
 
       // password has x symbols
-      var symbols = countPattern(password, '([!,@,#,$,%,^,&,*,?,_,~])', options.minimumSymbols);
-      if (symbols < 0) return -5;
-      else if (symbols > 0) score += 5;
+      var symbols = countPattern(password, '[!,@,#,$,%,^,&,*,?,_,~]', options.minimumSymbols);
+      if (symbols < 0) {
+        return -6;
+      }
+      else if (symbols > 0) {
+        score += 5;
+      }
 
       // password has Upper and Lower chars
-      var upLower = countPattern(password, '([a-z].*[A-Z])|([A-Z].*[a-z])', options.needsUpperLower ? 1 : 0);
-      if (upLower < 0) return -6;
-      else if (upLower > 0) score += 10;
+      var chars = upperChars + lowerChars;
+      if (chars < options.minimumChars) {
+        return -7;
+      }
+      if (upperChars * lowerChars > 0) {
+        score += 10;
+      }
 
       // password has numbers and chars
-      if (nums * chars > 0) {
-        score += 15;
-      }
+      score += (nums * chars > 0) ? 15 : -10;
 
       // password has numbers and symbols
       if (nums * symbols > 0) {
@@ -138,11 +165,6 @@
       // password has chars and symbols
       if (chars * symbols > 0) {
         score += 15;
-      }
-
-      // password is just numbers or chars
-      if ((nums * chars < 1)) {
-        score -= 10;
       }
 
       if (score > 100) {
@@ -166,14 +188,8 @@
      * @return int
      */
     function countPattern(password, pattern, min) {
-      var res = -1;
-      if (((password || '').match(new RegExp(pattern + '/g')) || []).length >= min) {
-        res = 1;
-      }
-      else if (min === 0) {
-        res = 0;
-      }
-      return res;
+      var count = ((password || '').match(new RegExp(pattern, 'g')) || []).length;
+      return (count >= min) ? count : -1;
     }
 
     /**
