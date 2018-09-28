@@ -72,11 +72,9 @@ Here's the list of available options you can pass to the `password` plugin:
 
 ~~~javascript
 $('#password').password({
-  shortPass: 'The password is too short',
   badPass: 'Weak; try combining letters & numbers',
-  goodPass: 'Medium; try using special charecters',
+  goodPass: 'Medium; try using special characters',
   strongPass: 'Strong password',
-  containsUsername: 'The password contains the username',
   enterPass: 'Type your password',
   showPercent: false,
   showText: true, // shows the text tips
@@ -84,7 +82,24 @@ $('#password').password({
   animateSpeed: 'fast', // the above animation speed
   username: false, // select the username field (selector or jQuery instance) for better password checks
   usernamePartialMatch: true, // whether to check for username partials
+  containsUsername: 'The password contains the username',
   minimumLength: 4 // minimum password length (below this threshold, the score is 0)
+  shortPass: 'The password is too short',
+  minimumNumbers: 0,
+  notEnoughNumbers: 'The Password needs at least 0 numbers',
+  minimumSymbols: 0,
+  notEnoughSymbols: 'The Password needs at least 0 symbols',
+  minimumLowerChars: 0,
+  notEnoughLowerChars: 'The Password needs at least 0 lower chars',
+  minimumUpperChars: 0,
+  notEnoughUpperChars: 'The Password needs at least 0 upper chars',
+  minimumChars: 1,
+  notEnoughChars: 'The Password needs at least 1 chars',
+  customSteps: { // optional, use/change if you want to replace the base-steps
+    0: 'Weak; try combining letters & numbers',
+    34: 'Medium; try using special characters',
+    68: 'Strong password'
+  },
 });
 ~~~
 
